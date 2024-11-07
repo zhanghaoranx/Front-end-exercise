@@ -37,4 +37,5 @@ img {
 
 img:hover {
     --f: 1.35;
+    outline-offset: 41px;
 }
