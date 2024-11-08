@@ -290,3 +290,429 @@ class Person {
   }
 }
 ```
+
+## 9、let、const、var三者有什么区别
+### 1.作用域
+- var：函数作用域。声明的变量在函数内有效，但不会局限于代码块内（如 if 或 for 语句块），所以可能导致变量污染。
+- let 和 const：块级作用域。只在当前代码块中有效，避免了变量提升带来的不确定性
+### 2.变量提升
+- var：存在变量提升，声明的变量会在代码执行前被提升到顶部，并初始化为 undefined。
+- let 和 const：也会提升，但不会初始化，使用前必须先声明，否则会抛出 ReferenceError。
+### 3.重复声明
+- var：允许在同一作用域内重复声明相同变量，不会报错。
+- let 和 const：在同一作用域内不允许重复声明相同变量。
+### 4.是否可重新赋值
+- var 和 let：声明的变量可以重新赋值。
+- const：声明的变量为常量，不可重新赋值。
+### 5.适用场景
+- var：现在已较少使用，因容易引发作用域污染和变量提升问题。
+- let：适合声明可变的变量，推荐在块级作用域中使用。
+- const：适合声明不可变的常量，且在赋值后不可修改，推荐默认使用 const，只有需要变更时再用 let。
+
+## 10、数组去重有哪些方法
+### 1.使用 Set
+### 利用 Set 数据结构，它会自动去重。
+```javascript
+const arr = [1, 2, 2, 3, 4, 4];
+const uniqueArr = [...new Set(arr)];
+// 结果：[1, 2, 3, 4]
+```
+### 2.filter + indexOf
+### 通过 filter 结合 indexOf 方法，保留第一次出现的元素。
+```javascript
+const arr = [1, 2, 2, 3, 4, 4];
+const uniqueArr = arr.filter((item, index) => arr.indexOf(item) === index);
+// 结果：[1, 2, 3, 4]
+```
+### 3.reduce
+### 使用 reduce 累加器实现去重。
+```javascript
+const arr = [1, 2, 2, 3, 4, 4];
+const uniqueArr = arr.reduce((acc, item) => {
+  if (!acc.includes(item)) acc.push(item);
+  return acc;
+}, []);
+// 结果：[1, 2, 3, 4]
+```
+### 4.forEach + includes
+### 手动遍历数组并使用 includes 进行判断。
+```javascript
+const arr = [1, 2, 2, 3, 4, 4];
+const uniqueArr = [];
+arr.forEach(item => {
+  if (!uniqueArr.includes(item)) uniqueArr.push(item);
+});
+// 结果：[1, 2, 3, 4]
+```
+### 5.Map 记录
+### 适用于复杂对象去重，通过 Map 存储已出现的值。
+```javascript
+const arr = [{ id: 1 }, { id: 2 }, { id: 1 }];
+const uniqueArr = [];
+
+const map = new Map();
+arr.forEach(item => {
+  if (!map.has(item.id)) {  // 判断 `Map` 中是否已存在该 id
+    map.set(item.id, true);  // 将 id 存入 `Map` 中
+    uniqueArr.push(item);    // 将去重后的对象添加到结果数组中
+  }
+});
+// 结果：[{ id: 1 }, { id: 2 }]
+```
+
+## 11、说一下深拷贝和浅拷贝，如何自己实现一个深拷贝
+### 深拷贝和浅拷贝的区别
+- 浅拷贝：只复制对象的第一层属性，对象内部嵌套的引用类型（如数组或对象）仍然指向原对象中的内存地址。也就是说，浅拷贝后的对象内部嵌套的引用类型数据仍然共享。
+  - 浅拷贝方法示例：Object.assign、扩展运算符 ...
+- 深拷贝：完全复制对象，包括嵌套的引用类型，使拷贝后的对象和原对象完全独立。深拷贝后的对象内部无论是基本类型还是引用类型都不与原对象共享。
+### 实现深拷贝的方法
+### 1.使用 JSON.parse(JSON.stringify(obj))
+这是最简单的方法，但有局限性（如无法拷贝函数、undefined、Date 等类型）。
+```javascript
+const obj = { a: 1, b: { c: 2 } };
+const deepCopy = JSON.parse(JSON.stringify(obj));
+```
+### 2.递归方法（自定义深拷贝）
+为了更全面地实现深拷贝，可以手动写一个递归函数，遍历对象的每一层并进行复制。
+```javascript
+function deepClone(obj) {
+  // 检查是否是基本类型
+  if (obj === null || typeof obj !== 'object') {
+    return obj;
+  }
+
+  // 处理 Date 类型
+  if (obj instanceof Date) {
+    return new Date(obj);
+  }
+
+  // 处理 Array 类型
+  if (Array.isArray(obj)) {
+    const arrCopy = [];
+    for (let item of obj) {
+      arrCopy.push(deepClone(item)); // 递归拷贝数组元素
+    }
+    return arrCopy;
+  }
+
+  // 处理普通对象类型
+  const objCopy = {};
+  for (let key in obj) {
+    if (obj.hasOwnProperty(key)) {
+      objCopy[key] = deepClone(obj[key]); // 递归拷贝对象属性
+    }
+  }
+  return objCopy;
+}
+
+// 测试
+const original = { a: 1, b: { c: 2 }, d: [3, 4], e: new Date() };
+const copied = deepClone(original);
+```
+## 12、vue的生命周期有哪一些？说一下它们每个阶段做什么操作
+### 1.创建阶段
+- `beforeCreate`  
+  实例初始化阶段，`data` 和 `methods` 等尚未被初始化，不能访问 `data`、`computed` 和 `methods` 中的内容。
+  - 用途：初始化一些没有依赖数据的操作，如初始化非响应式属性
+- `created`
+实例创建完成，`data`、`methods`、`computed`等已经被初始化，但未挂载到DOM上，`$el`不可用。
+  - 用途：可以进行数据请求、数据初始化等操作。
+### 2.挂载阶段
+- `beforeMount`  
+在挂载开始之前执行，此时模板已编译好，虚拟DOM已经创建完成，但还未渲染到真实DOM中。
+  - 用途：一般较少使用，除非在DOM挂载前需要执行一些操作。
+- `mounted`
+实例挂载完成，真实DOM已渲染，此时可以访问并操作真实DOM
+  - 用途：适合操作DOM，执行需要依赖真实DOM的操作，如获取节点、初始化第三方插件。
+### 3.更新阶段
+- `beforeUpdate`  
+在响应数据更新之前调用，发生在虚拟DOM重新渲染和打补丁之前。
+  - 用途：在更新之前执行某些操作，例如保存未更新的数据状态。
+- `updated`  
+响应式数据更新完成后调用，此时DOM也已完成重新渲染。
+  - 用途：可以执行依赖于DOM更新后的操作（避免频繁使用，因为频繁更新可能导致性能问题）。
+### 4.销毁阶段
+- `beforeDestroy`  
+实例销毁之前调用，实例仍然可以正常使用，数据和DOM都可访问。
+  - 用途：在实例被销毁前清除定时器、解绑事件等清理工作，避免内存泄露。
+- `destroyed`  
+实例销毁后调用，所有的绑定和事件监听器都会被移除，子实例也会被销毁。
+  - 用途：用于最后的清理操作。
+
+## 13、组件通讯方式有哪一些
+### 1.父子组件通信
+- `props`和`$emit`
+  - 父组件通过`props`向子组件传递数据。
+  - 子组件通过$emit发送事件来通知父组件。
+```javascript
+// 父组件
+<ChildComponent :message="parentMessage" @update="handleUpdate" />
+
+// 子组件
+props: ['message'],
+this.$emit('update', newValue);
+```
+### 2. 非父子组件通信
+- 事件总线（Event Bus）
+  - 使用空的Vue实例作为事件总线，让非父子关系的组件之间传递事件和数据。
+```javascript
+// 创建事件总线
+const EventBus = new Vue();
+
+// 组件 A 中触发事件
+EventBus.$emit('eventName', data);
+
+// 组件 B 中监听事件
+EventBus.$on('eventName', (data) => {
+  // 处理 data
+});
+```
+- 依赖注入（provide/inject）
+  - 父组件使用provide提供数据，后代组件使用inject获取，适合跨多级组件的传递。
+```javascript
+// 父组件
+provide() {
+  return { value: this.value };
+}
+
+// 子组件
+inject: ['value']
+```
+### 3.状态管理（Vuex）
+- Vuex
+  - 全局状态管理模式，适合复杂项目中的状态共享。通过state、getters、mutations和actions管理和共享数据。
+```javascript
+// 读取 Vuex 状态
+computed: {
+  value() {
+    return this.$store.state.value;
+  }
+}
+
+// 修改 Vuex 状态
+this.$store.commit('mutationName', payload);
+```
+### 4.`ref` 和 `attrs` / `listeners`
+- `ref`
+  - 父组件可以通过`ref`直接访问子组件实例方法和属性。
+```javascript
+// 父组件
+<ChildComponent ref="child" />
+this.$refs.child.method();
+```
+- `$attrs`和`$listeners`
+  - 用于向深层嵌套的子组件传递`props`和事件监听器，适合需要多层级传递时使用。
+
+## 14、Vuex有几个属性及作用
+### 1.`state`
+- 作用：存储全局的应用状态数据、类似于组件中的`data`。
+- 用法：通过`this.$store.state`访问状态。
+```javascript
+const store = new Vuex.Store({
+  state: {
+    count: 0
+  }
+});
+// 访问
+this.$store.state.count;
+```
+### 2.`getters`
+- 作用：类似于组件中的计算属性，`getters`用于对`state`中的数据进行处理并返回结果。
+- 用法：通过`this.$store.getters`访问。
+```javascript
+const store = new Vuex.Store({
+  state: { count: 0 },
+  getters: {
+    doubleCount: state => state.count * 2
+  }
+});
+// 访问
+this.$store.getters.doubleCount;
+```
+### 3.`mutations`
+- 作用：用于同步更改`state`中的数据，是修改`state`的唯一方式。
+- 用法：通过`commit`提交
+```javascript
+const store = new Vuex.Store({
+  state: { count: 0 },
+  mutations: {
+    increment(state) {
+      state.count++;
+    }
+  }
+});
+// 提交
+this.$store.commit('increment');
+```
+### 4.`actions`
+- 作用：用于执行异步操作（如请求API）或复杂的逻辑操作，最终提交`mutations`来修改状态。
+- 用法：通过`dispatch`分发。
+```javascript
+const store = new Vuex.Store({
+  state: { count: 0 },
+  mutations: {
+    increment(state) { state.count++; }
+  },
+  actions: {
+    asyncIncrement(context) {
+      setTimeout(() => {
+        context.commit('increment');
+      }, 1000);
+    }
+  }
+});
+// 分发
+this.$store.dispatch('asyncIncrement');
+```
+### 5.`modules`
+- 作用：用于将状态、`getters`、`mutations`和`actions`进行模块化，适合大型应用，将不同功能的状态分开管理。
+- 用法：在创建`store`时定义模块。
+```javascript
+const moduleA = {
+  state: { count: 0 },
+  mutations: { increment(state) { state.count++; } },
+  actions: { incrementAction({ commit }) { commit('increment'); } }
+};
+
+const store = new Vuex.Store({
+  modules: { a: moduleA }
+});
+// 访问
+this.$store.state.a.count;
+```  
+## 15、vue的监听属性和计算属性有什么区别？
+### 1.计算属性（`computed`）
+- 特点：计算属性基于它们的依赖进行缓存，只有依赖的数据发生变化时才会重新计算，否则返回缓存值。
+- 适用场景：适合用于基于现有数据计算出新数据，且该计算过程不需要异步操作。
+- 用法
+```javascript
+computed: {
+  fullName() {
+    return `${this.firstName} ${this.lastName}`;
+  }
+}
+```
+- 优点：缓存机制能避免不必要的重新计算，性能更好。
+### 2.监听属性（watch）
+- 特点：监听属性监听数据变化，并在变化时执行特定的回调函数。
+- 适用场景：适合用于执行异步或较为复杂的逻辑操作，如数据请求、深度监听对象或数组。
+- 用法：
+```javascript
+watch: {
+  firstName(newVal, oldVal) {
+    console.log(`First name changed from ${oldVal} to ${newVal}`);
+  }
+}
+```
+- 优点：可以响应式的处理更复杂的逻辑，且可监听到数据的变化过程（例如newVal和oldVal）
+
+## 16、说一下防抖和节流。怎么实现？
+### 防抖（Debounce）和节流（Throttle）都是优化高频触发事件（如滚动、输入、调整窗口大小等）的方法。它们的主要区别在于：防抖是让事件在一段时间不触发后执行，而节流是让事件在固定时间间隔内只执行一次。
+### 1.防抖（Debounce）
+- 作用：在事件触发时，延迟执行，如果在延迟时间内事件再次触发，则重新计时。
+- 适用场景：用户输入搜索关键词、调整窗口大小等，适合频繁触发但只希望在最后一次触发后执行的场景。
+### 实现防抖函数：
+```javascript
+function debounce(func, delay) {
+  let timer;
+  return function(...args) {
+    clearTimeout(timer);  // 清除之前的定时器
+    timer = setTimeout(() => {  // 重新设置定时器
+      func.apply(this, args);
+    }, delay);
+  };
+}
+
+// 使用
+window.addEventListener('resize', debounce(() => {
+  console.log('窗口大小改变后触发');
+}, 500));
+```
+### 2.节流（Throttle）
+- 作用：限制事件的执行频率，即使事件持续触发，也只会在每个固定时间间隔内执行一次。
+- 适用场景：页面滚动、按钮点击等，适合需要控制执行频率的场景。
+### 实现节流函数：
+```javascript
+function throttle(func, interval) {
+  let lastTime = 0;
+  return function(...args) {
+    const now = Date.now();
+    if (now - lastTime >= interval) {
+      func.apply(this, args);  // 在间隔时间后执行
+      lastTime = now;
+    }
+  };
+}
+
+// 使用
+window.addEventListener('scroll', throttle(() => {
+  console.log('页面滚动');
+}, 500));
+```
+## 17、Vue的导航守卫有哪一些？
+### 1.全局守卫
+- `beforeEach`  
+每次导航前调用，主要用于权限验证或页面访问控制。
+```javascript
+router.beforeEach((to, from, next) => {
+  // 验证逻辑
+  next(); // 放行导航
+});
+```
+- `beforeResolve`  
+  在组件内的 beforeRouteEnter 解析完成后执行。适合需要等待所有导航前置守卫完成后的操作。
+```javascript
+router.beforeResolve((to, from, next) => {
+  next();
+});
+```
+- `afterEach`  
+导航完成后调用（不会阻止导航），用于如记录日志等操作。
+```javascript
+router.afterEach((to, from) => {
+  // 导航后执行的逻辑
+});
+```
+### 2.路由独享守卫
+定义在特定路由配置中的守卫，仅对该路由有效：
+- `beforeEnter`  
+在进入某个特定路由前调用，常用于设置路由级别的权限验证。
+```javascript
+const routes = [
+  {
+    path: '/home',
+    component: Home,
+    beforeEnter: (to, from, next) => {
+      // 路由级守卫
+      next();
+    }
+  }
+];
+```
+### 3.组件内守卫
+定义在单个组件内，适用于组件的生命周期控制：
+- `beforeRouteEnter`  
+  在组件加载前调用，只有在导航成功后才进入组件，无法访问 `this`，但可以通过回调方式访问组件实例。
+```javascript
+beforeRouteEnter(to, from, next) {
+  next(vm => {
+    // 在导航完成后，访问组件实例 vm
+  });
+}
+```
+- `beforeRouteUpdate`  
+当同一路由被复用（例如`/user/1`到`/user/2`）时调用，适合更新组件的数据。
+```javascript
+beforeRouteUpdate(to, from, next) {
+  // 当路由参数更新时处理逻辑
+  next();
+}
+```
+- `beforeRouteLeave`  
+在导航离开组件时调用，常用于确认用户是否要离开当前页面（如未保存表单数据）。
+```javascript
+beforeRouteLeave(to, from, next) {
+  // 离开前确认
+  next();
+}
+```
