@@ -716,3 +716,64 @@ beforeRouteLeave(to, from, next) {
   next();
 }
 ```
+
+## 18、登录拦截怎么实现？
+### 在 Vue 应用中，登录拦截通常通过路由守卫实现。在用户访问需要登录权限的页面时，检查用户的登录状态，未登录则重定向到登录页面。
+### 实现步骤：
+### 1.设定登录状态
+在应用状态（如Vuex）或浏览器存储（如`loaclStroage`、`sessionStorage`）中保存用户登录状态或令牌（token）。
+### 2.设置路由元信息
+在需要登录访问的路由中添加`meta`字段，用于标记该路由是否需要登录权限。
+```javascript
+const routes = [
+  {
+    path: '/dashboard',
+    component: Dashboard,
+    meta: { requiresAuth: true } // 需要登录权限
+  },
+  {
+    path: '/login',
+    component: Login
+  }
+];
+```
+### 3.全局路由守卫进行拦截
+使用Vue Router的`beforeEach`全局导航守卫，在导航前检查用户是否登录。
+```javascript
+router.beforeEach((to, from, next) => {
+  const isAuthenticated = Boolean(localStorage.getItem('token')); // 检查登录状态
+  
+  // 判断路由是否需要权限
+  if (to.matched.some(record => record.meta.requiresAuth)) {
+    if (!isAuthenticated) {
+      // 用户未登录，重定向到登录页
+      next({ path: '/login', query: { redirect: to.fullPath } });
+    } else {
+      // 用户已登录，允许访问
+      next();
+    }
+  } else {
+    // 无需权限的路由，直接访问
+    next();
+  }
+});
+```
+### 4.登录成功后的重定向
+在登录页中，通过`redirect`参数返回用户最初想访问的页面。
+```javascript
+// 登录页面示例
+methods: {
+  login() {
+    // 登录逻辑，通过验证后
+    localStorage.setItem('token', 'userToken'); // 保存 token
+    
+    // 重定向到之前想访问的页面
+    const redirect = this.$route.query.redirect || '/';
+    this.$router.push(redirect);
+  }
+}
+```
+### 实现效果：
+- 当用户访问需要登录的页面时，`beforeEach` 会拦截并检查登录状态。
+- 未登录用户会被重定向到登录页面，并保存跳转前的路由信息。
+- 登录成功后，会将用户重定向回原始页面。
