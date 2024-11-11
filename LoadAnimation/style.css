@@ -11,7 +11,7 @@ body {
 .loading {
   width: 150px;
   height: 150px;
-  margin: 50px auto;
+  margin: 200px auto;
   position: relative;
   border-radius: 50%;
 }
