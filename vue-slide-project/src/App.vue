@@ -1,6 +1,6 @@
 <template>
   <div class="container">
-    <div :key="n" v-for="n in 10" class="item">{{ n }}</div>
+    <div v-slide-in :key="n" v-for="n in 10" class="item">{{ n }}</div>
   </div>
 </template>
 

@@ -2,10 +2,12 @@ const DISTANCE = 100;
 const DURATION = 500;
 const map = new WeakMap();
 const ob = new IntersectionObserver((entries) => {
+  console.log(entries);
   for (const entry of entries) {
     if (entry.isIntersecting) {
       //播放动画 entry.target
       const animation = map.get(entry.target);
+      console.log(animation);
       animation && animation.play();
       ob.unobserve(entry.target);
     }
@@ -30,7 +32,7 @@ export default {
     const animation = el.animate(
       [
         {
-          transform: `translateY(${DISTANCE})`,
+          transform: `translateY(${DISTANCE}px)`,
           opacity: 0.5,
         },
         {
