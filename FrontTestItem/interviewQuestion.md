@@ -777,3 +777,76 @@ methods: {
 - 当用户访问需要登录的页面时，`beforeEach` 会拦截并检查登录状态。
 - 未登录用户会被重定向到登录页面，并保存跳转前的路由信息。
 - 登录成功后，会将用户重定向回原始页面。
+
+## 19、介绍一下promise
+### `Promise`是ES6引入的一种用于处理异步操作的对象，提供了一种更优雅的方式来管理回调函数，解决了传统回调函数（“回调地狱”）的问题。
+### Promise的三种状态
+#### 1.`pending`（待定）：Promise刚创建时的初始状态，尚未完成。
+#### 2.`fulfilled`（已完成）：异步操作成功，调用`resolve`，并返回结果。
+#### 3.`rejected`（已失败）：异步操作失败，调用`reject`，并返回错误信息。
+#### 状态一旦从`pending`转为`fulfilled`或`rejected`，就不能再改变。
+
+### 基本用法
+### 1.创建一个promise  
+#### `Promise`构造函数接受一个回调函数，回调函数提供两个参数：`resolve`（表示成功）和`reject`（表示失败）。
+```javascript
+const promise = new Promise((resolve, reject) => {
+  const success = true; // 模拟异步任务
+  if (success) {
+    resolve('成功！');
+  } else {
+    reject('失败！');
+  }
+});
+```
+### 2.处理结果：`then`和`catch`
+- `then`:处理成功的结果。
+- `catch`处理失败的结果。
+```javascript
+promise
+  .then(result => {
+    console.log(result); // 输出：成功！
+  })
+  .catch(error => {
+    console.error(error);
+  });
+```
+### 3.链式调用
+可以通过链式调用将多个异步任务依次执行。
+```javascript
+new Promise(resolve => resolve(1))
+  .then(res => res + 1) // 返回 2
+  .then(res => console.log(res)) // 输出 2
+  .catch(err => console.error(err));
+```
+
+### 常用方法
+1.`Promise.all`并行执行多个Promise，等所有Promise完成后返回结果数组；如果有一个失败，则返回失败。
+```javascript
+Promise.all([Promise.resolve(1), Promise.resolve(2)])
+  .then(results => console.log(results)) // [1, 2]
+  .catch(error => console.error(error));
+```
+2.`Promise.race`并行执行多个Promise，返回第一个完成的结果（无论是成功还是失败）。
+```javascript
+Promise.race([
+  new Promise(resolve => setTimeout(() => resolve('A'), 100)),
+  new Promise(resolve => setTimeout(() => resolve('B'), 50))
+]).then(result => console.log(result)); // 输出：B
+```
+3.`Promise.allSettled`等所有Promise完成，无论成功还是失败，返回每个Promise的状态和结果。
+```javascript
+Promise.allSettled([Promise.resolve(1), Promise.reject('Error')])
+  .then(results => console.log(results));
+```
+4.`Promise.any`返回第一个成功的Promise，如果所有Promise都失败，则返回一个AggregateError。
+```javascript
+Promise.any([
+  Promise.reject('Error'),
+  Promise.resolve('Success')
+]).then(result => console.log(result)); // 输出：Success
+```
+## 20、什么是闭包？如何实现？
+#### 闭包（Closure） 是指 函数可以访问其定义时所在的词法作用域，即使这个函数是在其词法作用域之外调用。
+#### 通俗地说，闭包让内部函数记住了外部函数的变量，即使外部函数已经执行完毕并被销毁。
+### 闭包的特点
