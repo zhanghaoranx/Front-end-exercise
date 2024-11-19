@@ -850,3 +850,82 @@ Promise.any([
 #### 闭包（Closure） 是指 函数可以访问其定义时所在的词法作用域，即使这个函数是在其词法作用域之外调用。
 #### 通俗地说，闭包让内部函数记住了外部函数的变量，即使外部函数已经执行完毕并被销毁。
 ### 闭包的特点
+1.内部函数可以访问外部函数的变量
+2.外部函数执行完后，其作用域链不会被销毁，仍然被内部函数引用。
+3.闭包可以让变量的值保持在一个安全的环境中。
+
+### 闭包的实现
+闭包通常通过在函数内返回一个函数来实现。
+```javascript
+function outerFunction() {
+  let count = 0; // 外部函数的变量
+  return function() {
+    count++; // 内部函数可以访问 count
+    console.log(count);
+  };
+}
+
+const counter = outerFunction();
+counter(); // 输出 1
+counter(); // 输出 2
+```
+- `counter`是`outerFunction`返回的内部函数，它可以访问`conut`变量，即使`outerFunction`已经执行完毕。
+- `count`的值始终保存在闭包的作用域中。
+### 使用闭包的场景
+1.数据缓存  
+闭包可以保存一些状态或数据，便于后续使用。
+```javascript
+function createCache() {
+  const cache = {};
+  return function(key, value) {
+    if (value !== undefined) {
+      cache[key] = value; // 设置值
+    }
+    return cache[key]; // 获取值
+  };
+}
+
+const cache = createCache();
+cache('a', 100); // 设置缓存
+console.log(cache('a')); // 输出 100
+```
+2.封装私有变量  
+使用闭包可以模拟私有变量，避免全局污染。
+```javascript
+function Counter() {
+  let count = 0; // 私有变量
+  return {
+    increment() {
+      count++;
+      return count;
+    },
+    decrement() {
+      count--;
+      return count;
+    }
+  };
+}
+
+const counter = Counter();
+console.log(counter.increment()); // 输出 1
+console.log(counter.decrement()); // 输出 0
+```
+3.绑定事件  
+在事件处理函数中使用闭包保存数据。
+```javascript
+function bindEvent(element, message) {
+  element.addEventListener('click', function() {
+    console.log(message); // 闭包访问 message
+  });
+}
+
+const button = document.querySelector('button');
+bindEvent(button, 'Button clicked!');
+```
+### 闭包的优缺点
+- 优点：
+  - 数据持久化：可以保持函数的局部变量。
+  - 模拟私有变量：实现封装和安全性。
+- 缺点：
+  - 占用内存：由于外部作用域不会销毁，可能导致内存泄露。
+  - 调试困难：变量作用域变得复杂，增加调试难度。
